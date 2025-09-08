@@ -7,6 +7,7 @@ select * from customers;
 SELECT * FROM orders;
 
 -- Basic Level: 
+
 -- 1. Retrieve all books in the “Fiction” genre. 
 select * from books where Genre = "Fiction";
 
@@ -43,20 +44,8 @@ SELECT * FROM books WHERE Stock = (SELECT min(Stock) FROM books);
 -- 11. Calculate the total revenue from all orders. 
 select round(sum(Total_Amount),2) as Total_Revenue from orders;
 
--- Intermediate Level: 
--- 12. Retrieve the total number of books sold for each genre. 
-select Genre, Sum(Stock) as Total_No_of_Book_sold from books group by Genre;
-
--- 9. List all distinct genres in the bookstore.
-select distinct Genre from books;
-
--- 10. Find the book with the lowest stock available.
-select * from books where Stock=(select min(Stock) from books);
-
--- 11. Calculate the total revenue from all orders.
-select sum(Total_Amount) as Total_Revenue from orders;
-
 -- Intermediate Level:
+
 -- 12. Retrieve the total number of books sold for each genre.
 SELECT b.Genre, SUM(o.Quantity) AS total_number_of_books_sold
 FROM books AS b 
@@ -88,6 +77,7 @@ ORDER BY Price DESC
 LIMIT 3;
 
 -- Advanced Level: 
+
 -- 17. Retrieve the total quantity of books sold by each author. 
 select b.Author,sum(o.Quantity) as Total_quantity_of_books_sold 
 from books as b
