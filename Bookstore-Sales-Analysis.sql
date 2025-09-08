@@ -1,120 +1,163 @@
-create database onlinebookstore_db;
-use onlinebookstore_db;
-show tables;
+-- 🏗️ STEP 1: Set up the environment for analysis
+-- We're starting fresh by creating and using the online bookstore database.
+CREATE DATABASE onlinebookstore_db;
+USE onlinebookstore_db;
 
-select * from books;
-select * from customers;
+-- Let's quickly check what tables are available.
+SHOW TABLES;
+
+-- Preview the data to understand the structure of each table.
+SELECT * FROM books;
+SELECT * FROM customers;
 SELECT * FROM orders;
 
--- Basic Level: 
--- 1. Retrieve all books in the “Fiction” genre. 
-select * from books where Genre = "Fiction";
 
--- 2. Find books published after the year 1950. 
-select * from books where Published_Year >= 1950;
+-- ================================
+-- 📘 BASIC EXPLORATORY QUERIES
+-- ================================
 
--- 3. List all customers from Canada. 
-select * from customers where Country = "Canada";
+-- 1️⃣ Which books fall under the 'Fiction' genre?
+-- Helps us understand the range of fictional books in the inventory.
+SELECT * 
+FROM books 
+WHERE Genre = 'Fiction';
 
--- 4. Show orders placed in November 2023. 
-select * from orders where Order_Date like "2023-11%";
+-- 2️⃣ Which books were published after 1950?
+-- A look at more modern publications in the collection.
+SELECT * 
+FROM books 
+WHERE Published_Year > 1950;
 
--- 5. Retrieve the total stock of books available. 
-select sum(Stock) as Total_Stock_of_Books from books;
- 
--- 6. Find the details of the most expensive book. 
-SELECT * FROM books WHERE Price = (SELECT MAX(Price) FROM books);
+-- 3️⃣ Who are our Canadian customers?
+-- Useful for regional marketing or sales analysis.
+SELECT * 
+FROM customers 
+WHERE Country = 'Canada';
 
--- 7. Show all customers who ordered more than 1 quantity of a book.
-SELECT DISTINCT c.*
+-- 4️⃣ What orders were placed in November 2023?
+-- Zooming in on a specific month to analyze demand or campaign impact.
+SELECT * 
+FROM orders 
+WHERE Order_Date LIKE '2023-11%';
+
+-- 5️⃣ What's the total stock we currently have?
+-- Gives a quick snapshot of current inventory levels.
+SELECT SUM(Stock) AS Total_Stock 
+FROM books;
+
+-- 6️⃣ What’s the most expensive book we sell?
+-- Could be useful for promotions or high-ticket item tracking.
+SELECT * 
+FROM books 
+WHERE Price = (SELECT MAX(Price) FROM books);
+
+-- 7️⃣ Which customers ordered more than one copy of a book?
+-- Identifies bulk buyers or highly engaged customers.
+SELECT DISTINCT c.* 
 FROM customers c
 JOIN orders o ON c.Customer_ID = o.Customer_ID
 WHERE o.Quantity > 1;
 
--- 8. Retrieve all orders where the total amount exceeds $20. 
-select * from orders where Total_Amount > 20;
+-- 8️⃣ Which orders had a total value above $20?
+-- Helps identify higher-value transactions.
+SELECT * 
+FROM orders 
+WHERE Total_Amount > 20;
 
--- 9. List all distinct genres in the bookstore. 
-select distinct Genre from books;
+-- 9️⃣ What different genres do we have in our catalog?
+-- Gives an overview of our literary diversity.
+SELECT DISTINCT Genre 
+FROM books;
 
--- 10. Find the book with the lowest stock available. 
-SELECT * FROM books WHERE Stock = (SELECT min(Stock) FROM books);
+-- 🔟 Which book is running lowest on stock?
+-- Potential candidate for restocking.
+SELECT * 
+FROM books 
+WHERE Stock = (SELECT MIN(Stock) FROM books);
 
--- 11. Calculate the total revenue from all orders. 
-select round(sum(Total_Amount),2) as Total_Revenue from orders;
+-- 1️⃣1️⃣ What’s the total revenue generated so far?
+-- A quick business metric — how much we've earned.
+SELECT SUM(Total_Amount) AS Total_Revenue 
+FROM orders;
 
--- Intermediate Level: 
--- 12. Retrieve the total number of books sold for each genre. 
-select Genre, Sum(Stock) as Total_No_of_Book_sold from books group by Genre;
 
--- 9. List all distinct genres in the bookstore.
-select distinct Genre from books;
 
--- 10. Find the book with the lowest stock available.
-select * from books where Stock=(select min(Stock) from books);
+-- =====================================
+-- 📊 INTERMEDIATE ANALYTICS QUERIES
+-- =====================================
 
--- 11. Calculate the total revenue from all orders.
-select sum(Total_Amount) as Total_Revenue from orders;
-
--- Intermediate Level:
--- 12. Retrieve the total number of books sold for each genre.
-SELECT b.Genre, SUM(o.Quantity) AS total_number_of_books_sold
-FROM books AS b 
-JOIN orders AS o ON b.Book_ID = o.Book_ID
+-- 1️⃣2️⃣ How many books were sold per genre?
+-- Reveals which genres are most popular among customers.
+SELECT b.Genre, SUM(o.Quantity) AS Total_Books_Sold
+FROM books b
+JOIN orders o ON b.Book_ID = o.Book_ID
 GROUP BY b.Genre;
 
--- 13. Find the average price of books in the “Fantasy” genre.
-select avg(Price) from books where Genre='Fantasy';
+-- 1️⃣3️⃣ What’s the average price of a Fantasy book?
+-- Helps gauge pricing strategy within a specific genre.
+SELECT AVG(Price) AS Avg_Fantasy_Price
+FROM books 
+WHERE Genre = 'Fantasy';
 
--- 14. List customers who have placed at least 2 orders.
-SELECT c.Name, COUNT(o.Order_ID) AS Number_of_Orders
+-- 1️⃣4️⃣ Which customers placed at least 2 orders?
+-- Identifies repeat customers — useful for loyalty programs.
+SELECT c.Name, COUNT(o.Order_ID) AS Order_Count
 FROM customers c
 JOIN orders o ON c.Customer_ID = o.Customer_ID
 GROUP BY c.Name
 HAVING COUNT(o.Order_ID) >= 2;
 
-
--- 15. Find the most frequently ordered book.
-SELECT b.Title, SUM(o.Quantity) AS total_ordered
-FROM orders o
-JOIN books b ON o.Book_ID = b.Book_ID
+-- 1️⃣5️⃣ Which book has been ordered the most?
+-- Tells us our bestseller — key for promotions and inventory planning.
+SELECT b.Title, SUM(o.Quantity) AS Total_Ordered
+FROM books b
+JOIN orders o ON b.Book_ID = o.Book_ID
 GROUP BY b.Title
-ORDER BY total_ordered DESC
+ORDER BY Total_Ordered DESC
 LIMIT 1;
 
--- 16. Show the top 3 most expensive books of the “Fantasy” genre.
+-- 1️⃣6️⃣ What are the top 3 most expensive Fantasy books?
+-- Targets premium books within the Fantasy genre.
 SELECT Title, Price
 FROM books
 WHERE Genre = 'Fantasy'
 ORDER BY Price DESC
 LIMIT 3;
 
--- Advanced Level: 
--- 17. Retrieve the total quantity of books sold by each author. 
-select b.Author,sum(o.Quantity) as Total_quantity_of_books_sold 
-from books as b
-join orders as o on b.Book_ID = o.Book_ID
-group by b.Author;
 
--- 18. List the cities of customers who spent over $30. 
-select c.City from customers as c
-join orders as o on c.Customer_ID = o.Customer_ID
-where Total_Amount > 30
-group by c.City;
 
--- 19. Find the customer who spent the most on orders. 
-SELECT c.Customer_ID, c.Name, SUM(o.Total_Amount) AS Customer_Total_Amount_Spent
+-- ===============================
+-- 📈 ADVANCED INSIGHTS & METRICS
+-- ===============================
+
+-- 1️⃣7️⃣ How many books has each author sold?
+-- A performance breakdown by author — great for analytics and deals.
+SELECT b.Author, SUM(o.Quantity) AS Total_Quantity_Sold
+FROM books b
+JOIN orders o ON b.Book_ID = o.Book_ID
+GROUP BY b.Author
+ORDER BY Total_Quantity_Sold DESC;
+
+-- 1️⃣8️⃣ Which cities have customers who spent more than $30?
+-- Useful for identifying high-value markets.
+SELECT c.City, o.Total_Amount
 FROM customers c
 JOIN orders o ON c.Customer_ID = o.Customer_ID
-GROUP BY c.Customer_ID, c.Name
-ORDER BY Customer_Total_Amount_Spent DESC
+WHERE o.Total_Amount > 30
+ORDER BY o.Total_Amount ASC;
+
+-- 1️⃣9️⃣ Who is our top spending customer?
+-- Helps recognize VIPs or high-value customers.
+SELECT c.Name, SUM(o.Total_Amount) AS Total_Spent
+FROM customers c
+JOIN orders o ON c.Customer_ID = o.Customer_ID
+GROUP BY c.Name
+ORDER BY Total_Spent DESC
 LIMIT 1;
 
-
--- 20. Calculate the stock remaining after fulfilling all orders.
-SELECT 
-    b.Book_ID,
-    b.Stock - IFNULL(SUM(o.Quantity), 0) AS Stock_Remaining
+-- 2️⃣0️⃣ What’s the current stock after fulfilling all orders?
+-- Shows real-time inventory after accounting for sales.
+SELECT b.Book_ID, b.Stock - IFNULL(SUM(o.Quantity), 0) AS Remaining_Stock
 FROM books b
 LEFT JOIN orders o ON b.Book_ID = o.Book_ID
 GROUP BY b.Book_ID, b.Stock;
